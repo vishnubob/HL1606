@@ -2,6 +2,7 @@
 #define __CONFIG_H
 
 #include <WProgram.h>
+#include "HL1606stripPWM.h"
 
 #define RED 1
 #define GRN 2

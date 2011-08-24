@@ -1,4 +1,3 @@
-#include "HL1606strip.h"
 #include "config.h"
 #include <SD.h>
  

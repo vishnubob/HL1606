@@ -1,0 +1,1 @@
+../strip/HL1606strip.h

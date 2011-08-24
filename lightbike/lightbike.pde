@@ -1,18 +1,6 @@
-// Example code for fast-PWM control of HL1606 LEDs
-// public domain, enjoy!
-
-/*
- * GND  - Green
- * SI   - Brown
- * DI   - Grey
- * CI   - White
- * LI   - Yellow
- */                         
-
 #include "config.h"
 #include "Thing.h"
 #include "hsv2rgb.h"
-#include "HL1606stripPWM.h"
 
 int latchPin = 10;
 HL1606stripPWM strip = HL1606stripPWM(32, latchPin); 

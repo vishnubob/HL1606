@@ -1,3 +1,8 @@
+#ifndef __CONFIG_H
+#define __CONFIG_H
+
+#include "HL1606strip.h"
+
 /*
 *   5V      - Or/Bl
 *   Latch   - Wor
@@ -31,3 +36,5 @@
 #define _RED    0b100
 #define _GRN    0b001
 #define _BLU    0b010
+
+#endif // __CONFIG_H
