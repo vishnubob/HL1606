@@ -7,6 +7,8 @@
 
 HL1606strip     strip = HL1606strip(STRIP_DATA, STRIP_LATCH, STRIP_CLOCK, NUM_LEDS);
 uint8_t         led_buffer[NUM_LEDS];
+uint16_t        ImageCount;
+uint16_t        CurrentImage;
  
 /*******************************************************************************
  ** HL1606
@@ -106,7 +108,34 @@ void color_fill(uint8_t color) {
  ** Filesystem
  ******************************************************************************/
 
-bool write_image(uint16_t idx, uint32_t scan_rate)
+uint16_t get_image_count()
+{
+    Image fd;
+    char *fn = "imgcnt.dat";
+
+    if (!SD.exists(fn)) 
+    { 
+#ifdef SERIAL_DEBUG
+        Serial.print("Failed to find ");
+        Serial.println(fn);
+#endif
+        return -1; 
+    }
+
+    fd = SD.open(fn, FILE_READ);
+    if (!fd)
+    {
+#ifdef SERIAL_DEBUG
+        Serial.print("Failed to open ");
+        Serial.println(fn);
+#endif
+        return -1; 
+    }
+
+    return static_cast<uint16_t>((fd.read() << 8) | fd.read());
+}
+
+bool write_image(uint16_t idx, uint8_t scan_rate)
 {
     File image;
     uint32_t sz;
@@ -123,7 +152,7 @@ bool write_image(uint16_t idx, uint32_t scan_rate)
         Serial.print("Failed to find ");
         Serial.println(fn);
 #endif
-        //return false; 
+        return false; 
     }
     image = SD.open(fn, FILE_READ);
     if (!image)
@@ -132,7 +161,7 @@ bool write_image(uint16_t idx, uint32_t scan_rate)
         Serial.print("Failed to open ");
         Serial.println(fn);
 #endif
-        //return false; 
+        return false; 
     }
 
     sz = image.size();
@@ -154,13 +183,13 @@ bool write_image(uint16_t idx, uint32_t scan_rate)
         {
             *buf++ = image.read();
         }
-        while((millis() - ts) < scan_rate)
-        {}
         write_buffer_to_strip();
-        #ifdef SERIAL_DEBUG
+#ifdef SERIAL_DEBUG
             Serial.print("Wrote col #");
             Serial.println(col);
-        #endif
+#endif
+        while((millis() - ts) < scan_rate)
+        {}
     }
 
     image.close();
@@ -173,7 +202,6 @@ bool write_image(uint16_t idx, uint32_t scan_rate)
 
 void setup(void) 
 {
-
     color_fill(_RED);
     delay(1000);
     color_fill(_GRN);
@@ -187,10 +215,14 @@ void setup(void)
     Serial.println("LightScythe v.02");
 #endif
     SD.begin(CS_PIN);
+    ImageCount = get_image_count();
+    CurrentImage = 0;
 }
 
 void loop(void) 
 { 
-    write_image(1, 1);
+    uint8_t scan_rate = map(analogRead(SPEED_DIAL_PIN), 0, 1023, 50, 200);
+    write_image(CurrentImage, scan_rate);
+    CurrentImage = (CurrentImage + 1) % ImageCount;
 }
 

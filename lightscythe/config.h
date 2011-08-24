@@ -37,4 +37,17 @@
 #define _GRN    0b001
 #define _BLU    0b010
 
+// Speed dial
+#define SPEED_DIAL_PIN A1
+
+
+/*
+ * Interface
+ * Speed dial
+ * Auto-increment on / off
+ * One-shot / loop
+ * next / prev (buttons)
+ * go (button)
+ */
+
 #endif // __CONFIG_H
