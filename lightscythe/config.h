@@ -37,9 +37,21 @@
 #define _GRN    0b001
 #define _BLU    0b010
 
-// Speed dial
-#define SPEED_DIAL_PIN A1
+// Pin maps
+#define SPEED_DIAL_PIN  A1
+#define AUTO_INC_PIN    A2
+#define ONE_SHOT_PIN    A2
+#define GO_PIN          A2
+#define UP_PIN          A2
+#define DOWN_PIN        A2
 
+#define AUTO_INC_IDX    0
+#define ONE_SHOT_IDX    1
+#define GO_IDX          2
+#define UP_IDX          3
+#define DOWN_IDX        4
+
+#define BUTTON_COUNT    5
 
 /*
  * Interface

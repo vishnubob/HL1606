@@ -7,9 +7,14 @@
 
 HL1606strip     strip = HL1606strip(STRIP_DATA, STRIP_LATCH, STRIP_CLOCK, NUM_LEDS);
 uint8_t         led_buffer[NUM_LEDS];
-uint16_t        ImageCount;
-uint16_t        CurrentImage;
- 
+
+uint16_t        image_count;
+uint16_t        current_image;
+
+/* buttons */
+bool            button_state[BUTTON_COUNT]; 
+const uint8_t   _pin_map[] = {AUTO_INC_PIN, ONE_SHOT_PIN, GO_PIN, UP_PIN, DOWN_PIN};
+
 /*******************************************************************************
  ** HL1606
  ******************************************************************************/
@@ -135,7 +140,7 @@ uint16_t get_image_count()
     return static_cast<uint16_t>((fd.read() << 8) | fd.read());
 }
 
-bool write_image(uint16_t idx, uint8_t scan_rate)
+bool write_image(uint16_t idx)
 {
     File image;
     uint32_t sz;
@@ -188,6 +193,7 @@ bool write_image(uint16_t idx, uint8_t scan_rate)
             Serial.print("Wrote col #");
             Serial.println(col);
 #endif
+        scan_rate = map(analogRead(SPEED_DIAL_PIN), 0, 1023, 50, 200);
         while((millis() - ts) < scan_rate)
         {}
     }
@@ -196,12 +202,37 @@ bool write_image(uint16_t idx, uint8_t scan_rate)
     return true;
 }
 
+void update_flags(uint8_t threshold=50)
+{
+    int8_t counts[BUTTON_COUNT];
+    for(uint8_t pin = 0; pin < BUTTON_COUNT; ++pin)
+    {
+        counts[pin] = 0;
+    }
+    for(uint8_t i = 0; i < threshold; ++i)
+    {
+        for(uint8_t pin = 0; pin < BUTTON_COUNT; ++pin)
+        {
+            counts[pin] = digitalRead(_pin_map[pin]) ? (counts[pin] + 1) : (counts[pin] - 1);
+        }
+    }
+    for(uint8_t pin = 0; pin < BUTTON_COUNT; ++pin)
+    {
+        button_state[pin] = counts[pin] > 0;
+    }
+}
+
 /*******************************************************************************
  ** setup / loop
  ******************************************************************************/
 
 void setup(void) 
 {
+    for(uint8_t pin = 0; pin < BUTTON_COUNT; ++pin)
+    {
+        pinMode(_pin_map[pin], OUTPUT);
+    }
+    
     color_fill(_RED);
     delay(1000);
     color_fill(_GRN);
@@ -221,8 +252,20 @@ void setup(void)
 
 void loop(void) 
 { 
-    uint8_t scan_rate = map(analogRead(SPEED_DIAL_PIN), 0, 1023, 50, 200);
-    write_image(CurrentImage, scan_rate);
-    CurrentImage = (CurrentImage + 1) % ImageCount;
+    update_flags();
+
+    if ((!button_state[ONE_SHOT_IDX]) || (button_state[ONE_SHOT_IDX] && button_state[GO_IDX]))
+    {
+        write_image(current_image);
+    }
+
+    if (button_state[AUTO_INC_IDX] || button_state[UP_IDX])
+    {
+        current_image = (current_image + 1) % image_count;
+    } else
+    if (button_state[DOWN_IDX])
+    {
+        current_image = (current_image - 1) % image_count;
+    }
 }
 

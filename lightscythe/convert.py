@@ -17,6 +17,7 @@ Defaults = {
     "margin_bottom": 0,
     "reverse": False,
     "rows": 70,
+    "proof": False,
 }
 
 class ScytheConverter(object):
@@ -52,16 +53,18 @@ class ScytheConverter(object):
         for x in range(width):
             for y in range(height):
                 if self.reverse:
-                    y = height - (y + 1)
+                    r_xy = (x, height - (y + 1) - self.margin_top)
+                else:
+                    r_xy = (x, y - self.margin_top)
+                w_xy = (x, y - self.margin_top)
                 if self.margin_top and (y < self.margin_top):
                     rgb = 0
                 elif self.margin_bottom and (y > (self.margin_top + self.actual_height)):
                     rgb = 0
                 else:
-                    xy = (x, y - self.margin_top)
-                    rgb = self.image.getpixel(xy)
+                    rgb = self.image.getpixel(r_xy)
                     rgb = self.color_match(rgb)
-                cnv.putpixel(xy, self.rgb_value(rgb))
+                cnv.putpixel(w_xy, self.rgb_value(rgb))
                 data += chr(rgb)
         out = open(self.outfn, 'w')
         out.write(data)
@@ -119,6 +122,7 @@ def get_cli():
     parser.add_option("-T", "--top", dest="margin_top", type="int", help="Size of top margin")
     parser.add_option("-B", "--bottom", dest="margin_bottom", type="int", help="Size of bottom margin")
     parser.add_option("-R", "--reverse", dest="reverse", action="store_true", help="Name of target directory")
+    parser.add_option("-P", "--proof", dest="proof", action="store_true", help="Generate proof images")
     parser.set_defaults(**Defaults)
     (opts, args) = parser.parse_args()
     opts = eval(str(opts))
