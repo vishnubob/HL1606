@@ -3,33 +3,64 @@
 #include "hsv2rgb.h"
 
 int latchPin = 10;
-HL1606stripPWM strip = HL1606stripPWM(32, latchPin); 
+HL1606stripPWM strip = HL1606stripPWM(latchPin);
+
+bool bounce(int pin, unsigned int level)
+{
+    int debounce = 0;
+    int dcount = 0;
+    for( ; dcount <= 5; dcount++)
+    {
+        if (digitalRead(pin) == level)
+        {
+            debounce++;
+            delay(20);
+        }
+    }
+    return (debounce == dcount);
+}
+
 
 void setup() 
 {
     Serial.begin(9600);
     Serial.println("hello!");
-    strip.set_bitdepth(4);
+    randomSeed(analogRead(0));
+
+    if(bounce(LED_MODE_PIN, true))
+    {
+        strip.set_length(LONG_COUNT);
+        strip.set_bitdepth(4);
+    } else
+    {
+        strip.set_length(SHORT_COUNT);
+        strip.set_bitdepth(5);
+    }
     strip.set_div(16);
     strip.setCPUmax(70);
     strip.begin();
+
+#ifdef SERIAL_DEBUG
+    Serial.begin(9600);
+    Serial.println("LightBike v.01");
+    Serial.print("LED count ");
+    Serial.println((int)strip.get_length());
     strip.report();
-    randomSeed(analogRead(0));
+#endif
 }
 
 void loop()
 {
     uint8_t last_mode = -1;
-    const uint8_t total_modes = 3;
     while(1)
     {
         uint8_t next_mode = last_mode;
         while (last_mode == next_mode)
         {
-            next_mode = random(total_modes);
+            next_mode = random(TOTAL_MODES);
         }
-        //switch(next_mode)
-        switch(0)
+        //switch(1)
+        switch(next_mode)
         {
             case 0:
                 rainbow();

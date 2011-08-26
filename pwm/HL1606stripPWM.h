@@ -42,10 +42,12 @@ private:
     void _spi_init(void);
 
 public:
-    HL1606stripPWM(uint8_t length, uint8_t latch);
+    HL1606stripPWM(uint8_t latch, uint8_t length=0);
     void begin(void);
     void report(void);
 
+
+    void set_length(uint8_t length);
     uint8_t get_length(void)
     { return _length; }
 

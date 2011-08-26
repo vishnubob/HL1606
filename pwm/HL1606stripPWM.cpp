@@ -2,9 +2,9 @@
 
 static HL1606stripPWM *__strip;
 
-HL1606stripPWM::HL1606stripPWM(uint8_t n, uint8_t l) 
+HL1606stripPWM::HL1606stripPWM(uint8_t l, uint8_t n) 
 {
-    _length = n;
+    _length = 0;
     _latch_pin = l;
     pwmcounter = 0;
     _bitdepth = 3;
@@ -12,6 +12,36 @@ HL1606stripPWM::HL1606stripPWM(uint8_t n, uint8_t l)
     pwmincr = 256 / (1 << _bitdepth);
     _spi_div = 32;
 
+    if (_length)
+    {
+        redPWM = (uint8_t *)malloc(_length);
+        greenPWM = (uint8_t *)malloc(_length);
+        bluePWM = (uint8_t *)malloc(_length);
+    } else
+    {
+        redPWM = 0;
+        greenPWM = 0;
+        bluePWM = 0;
+    }
+
+    for (uint8_t i = 0; i < _length; ++i) 
+    {
+        set_color(i, 0, 0, 0);
+    }
+}
+
+// XXX: Don't do this more then once
+// memory will fragment
+void HL1606stripPWM::set_length(uint8_t n)
+{
+    if(_length)
+    {
+        free(redPWM);
+        free(greenPWM);
+        free(bluePWM);
+    }
+
+    _length = n;
     redPWM = (uint8_t *)malloc(_length);
     greenPWM = (uint8_t *)malloc(_length);
     bluePWM = (uint8_t *)malloc(_length);

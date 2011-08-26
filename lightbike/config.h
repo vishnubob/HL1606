@@ -15,4 +15,11 @@ typedef struct _rgb
     unsigned char b;
 } _rgb_t;
 
+#define LONG_COUNT      70
+#define SHORT_COUNT     48
+#define LED_MODE_PIN    A5
+#define TOTAL_MODES     4
+
+#define SERIAL_DEBUG
+
 #endif // __CONFIG_H
